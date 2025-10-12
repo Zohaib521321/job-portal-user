@@ -1,103 +1,245 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import Navbar from '@/components/Navbar';
+import JobCard from '@/components/JobCard';
+import Footer from '@/components/Footer';
+import { useSettings } from '@/contexts/SettingsContext';
+import { apiGet } from '@/lib/api';
+
+interface Job {
+  id: number;
+  title: string;
+  company_name: string;
+  location: string;
+  job_type: string;
+  salary_range: string;
+  description: string;
+  category_name?: string;
+  priority?: string;
+}
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const { settings } = useSettings();
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [selectedType, setSelectedType] = useState('all');
+  const limit = 9; // Jobs per page
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    fetchJobs();
+  }, [currentPage, selectedType]);
+
+  const fetchJobs = async () => {
+    try {
+      setIsLoading(true);
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: limit.toString(),
+        status: 'active',
+      });
+
+      if (selectedType && selectedType !== 'all') {
+        params.append('job_type', selectedType);
+      }
+
+      if (searchTerm.trim()) {
+        params.append('search', searchTerm.trim());
+      }
+
+      const data = await apiGet(`/api/jobs?${params}`);
+
+      if (data.success) {
+        setJobs(data.data);
+        setTotalPages(data.pagination.totalPages);
+      }
+    } catch (err) {
+      console.error('Error fetching jobs:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(1); // Reset to first page on new search
+    fetchJobs();
+  };
+
+  const handleTypeFilter = (type: string) => {
+    setSelectedType(type);
+    setCurrentPage(1); // Reset to first page when changing filter
+  };
+
+  return (
+    <div className="min-h-screen">
+      <Navbar />
+      
+      <main className="container mx-auto px-4 py-8">
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold text-foreground mb-4">
+            {settings.site_tagline ? (
+              <span dangerouslySetInnerHTML={{ __html: settings.site_tagline.replace(/Dream Job/i, '<span class="text-primary">$&</span>') || settings.site_tagline }} />
+            ) : (
+              <>Find Your <span className="text-primary">Dream Job</span></>
+            )}
+          </h1>
+          <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+            {settings.site_description || 'Browse thousands of job opportunities from top companies around the world'}
+          </p>
         </div>
+
+        {/* Search Bar */}
+        <form onSubmit={handleSearch} className="max-w-4xl mx-auto mb-12">
+          <div className="flex gap-4">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by job title, company, or location..."
+              className="flex-1 bg-surface text-foreground border border-accent rounded-lg px-4 py-3 focus:outline-none focus:border-primary transition-colors"
+            />
+            <button 
+              type="submit"
+              className="bg-primary text-background font-semibold px-8 py-3 rounded-lg hover:bg-primary-dark transition-all duration-200"
+            >
+              Search
+            </button>
+          </div>
+        </form>
+
+        {/* Filters */}
+        <div className="flex gap-4 mb-8 flex-wrap">
+          <button 
+            onClick={() => handleTypeFilter('all')}
+            className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+              selectedType === 'all' 
+                ? 'bg-primary text-background' 
+                : 'bg-surface text-text-secondary hover:bg-accent hover:text-foreground'
+            }`}
+          >
+            All Jobs
+          </button>
+          <button 
+            onClick={() => handleTypeFilter('full-time')}
+            className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+              selectedType === 'full-time' 
+                ? 'bg-primary text-background' 
+                : 'bg-surface text-text-secondary hover:bg-accent hover:text-foreground'
+            }`}
+          >
+            Full-time
+          </button>
+          <button 
+            onClick={() => handleTypeFilter('contract')}
+            className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+              selectedType === 'contract' 
+                ? 'bg-primary text-background' 
+                : 'bg-surface text-text-secondary hover:bg-accent hover:text-foreground'
+            }`}
+          >
+            Contract
+          </button>
+          <button 
+            onClick={() => handleTypeFilter('remote')}
+            className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+              selectedType === 'remote' 
+                ? 'bg-primary text-background' 
+                : 'bg-surface text-text-secondary hover:bg-accent hover:text-foreground'
+            }`}
+          >
+            Remote
+          </button>
+          <button 
+            onClick={() => handleTypeFilter('internship')}
+            className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+              selectedType === 'internship' 
+                ? 'bg-primary text-background' 
+                : 'bg-surface text-text-secondary hover:bg-accent hover:text-foreground'
+            }`}
+          >
+            Internship
+          </button>
+        </div>
+
+        {/* Loading State */}
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            <p className="text-text-secondary mt-4">Loading jobs...</p>
+          </div>
+        ) : (
+          <>
+            {/* Job Listings */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {jobs.map((job) => (
+                <JobCard 
+                  key={job.id} 
+                  id={job.id.toString()}
+                  title={job.title}
+                  company={job.company_name}
+                  location={job.location || 'Not specified'}
+                  type={job.job_type || 'Full-time'}
+                  salary={job.salary_range}
+                  description={job.description}
+                  priority={job.priority}
+                />
+              ))}
+            </div>
+
+            {/* No Results */}
+            {jobs.length === 0 && (
+              <div className="text-center py-12 bg-surface rounded-lg">
+                <p className="text-text-secondary text-lg">No jobs found</p>
+                <p className="text-text-secondary text-sm mt-2">Try adjusting your search or filters</p>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-surface text-foreground rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+
+                <div className="flex gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                        currentPage === page
+                          ? 'bg-primary text-background'
+                          : 'bg-surface text-foreground hover:bg-accent'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-surface text-foreground rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      <Footer />
     </div>
   );
 }
