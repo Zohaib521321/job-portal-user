@@ -25,6 +25,14 @@ interface Job {
   total_clicks: number;
 }
 
+interface JobApiResponse {
+  success: boolean;
+  data: Job;
+  error?: {
+    message?: string;
+  };
+}
+
 export default function JobDetails() {
   const params = useParams();
   const [job, setJob] = useState<Job | null>(null);
@@ -40,7 +48,7 @@ export default function JobDetails() {
   const fetchJob = async (id: string) => {
     try {
       setIsLoading(true);
-      const data = await apiGet(`/api/jobs/${id}`);
+      const data = await apiGet<JobApiResponse>(`/api/jobs/${id}`);
 
       if (data.success) {
         setJob(data.data);
