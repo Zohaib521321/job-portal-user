@@ -27,6 +27,22 @@ interface Job {
   description: string;
 }
 
+interface CategoryApiResponse {
+  success: boolean;
+  data: Category;
+  error?: {
+    message?: string;
+  };
+}
+
+interface JobsApiResponse {
+  success: boolean;
+  data: Job[];
+  pagination: {
+    totalPages: number;
+  };
+}
+
 export default function CategoryJobs() {
   const params = useParams();
   const [category, setCategory] = useState<Category | null>(null);
@@ -42,11 +58,12 @@ export default function CategoryJobs() {
       fetchCategory();
       fetchCategoryJobs();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, currentPage]);
 
   const fetchCategory = async () => {
     try {
-      const data = await apiGet(`/api/categories/${params.id}`);
+      const data = await apiGet<CategoryApiResponse>(`/api/categories/${params.id}`);
 
       if (data.success) {
         setCategory(data.data);
@@ -62,7 +79,7 @@ export default function CategoryJobs() {
   const fetchCategoryJobs = async () => {
     try {
       setIsLoading(true);
-      const data = await apiGet(
+      const data = await apiGet<JobsApiResponse>(
         `/api/jobs?category_id=${params.id}&status=active&page=${currentPage}&limit=${limit}`
       );
 

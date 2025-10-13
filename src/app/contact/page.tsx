@@ -7,6 +7,13 @@ import { useSettings } from '@/contexts/SettingsContext';
 
 import { apiPost } from '@/lib/api';
 
+interface ApiResponse {
+  success: boolean;
+  error?: {
+    message?: string;
+  };
+}
+
 export default function Contact() {
   const { settings } = useSettings();
   const [formData, setFormData] = useState({
@@ -26,7 +33,7 @@ export default function Contact() {
     setSubmitStatus(null);
 
     try {
-      const data = await apiPost('/api/contact', {
+      const data = await apiPost<ApiResponse>('/api/contact', {
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: formData.email,
@@ -38,7 +45,7 @@ export default function Contact() {
       if (data.success) {
         setSubmitStatus({
           type: 'success',
-          message: 'Thank you! Your message has been sent successfully. We\'ll get back to you soon.'
+          message: 'Thank you! Your message has been sent successfully. We&apos;ll get back to you soon.'
         });
         setFormData({ firstName: '', lastName: '', email: '', phone: '', subject: '', message: '' });
       } else {
@@ -68,7 +75,7 @@ export default function Contact() {
               Get in <span className="text-primary">Touch</span>
             </h1>
             <p className="text-text-secondary text-lg">
-              Have questions? We're here to help
+              Have questions? We&apos;re here to help
             </p>
           </div>
 

@@ -16,6 +16,14 @@ interface Category {
   status: string;
 }
 
+interface ApiResponse {
+  success: boolean;
+  data: Category[];
+  error?: {
+    message?: string;
+  };
+}
+
 export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,7 +36,7 @@ export default function Categories() {
   const fetchCategories = async () => {
     try {
       setIsLoading(true);
-      const data = await apiGet('/api/categories?status=active');
+      const data = await apiGet<ApiResponse>('/api/categories?status=active');
       
       if (data.success) {
         setCategories(data.data);
@@ -109,7 +117,7 @@ export default function Categories() {
 
         <div className="mt-12 bg-surface rounded-lg p-8 text-center">
           <h2 className="text-2xl font-bold text-foreground mb-4">
-            Don't see your category?
+            Don&apos;t see your category?
           </h2>
           <p className="text-text-secondary mb-6">
             Help us improve by suggesting a new category

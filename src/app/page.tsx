@@ -19,6 +19,14 @@ interface Job {
   priority?: string;
 }
 
+interface JobsApiResponse {
+  success: boolean;
+  data: Job[];
+  pagination: {
+    totalPages: number;
+  };
+}
+
 export default function Home() {
   const { settings } = useSettings();
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -31,6 +39,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, selectedType]);
 
   const fetchJobs = async () => {
@@ -50,7 +59,7 @@ export default function Home() {
         params.append('search', searchTerm.trim());
       }
 
-      const data = await apiGet(`/api/jobs?${params}`);
+      const data = await apiGet<JobsApiResponse>(`/api/jobs?${params}`);
 
       if (data.success) {
         setJobs(data.data);
