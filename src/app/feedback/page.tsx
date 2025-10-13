@@ -5,7 +5,12 @@ import Navbar from '@/components/Navbar';
 import { useState } from 'react';
 
 import { apiPost } from '@/lib/api';
-
+interface ApiResponse {
+  success: boolean;
+  error?: {
+    message?: string;
+  };
+}
 export default function Feedback() {
   const [formData, setFormData] = useState({
     name: '',
@@ -22,7 +27,7 @@ export default function Feedback() {
     setSubmitStatus(null);
 
     try {
-      const data = await apiPost('/api/feedback', {
+      const data = await apiPost<ApiResponse>('/api/feedback', {
         name: formData.name,
         email: formData.email,
         feedback_type: formData.type,
