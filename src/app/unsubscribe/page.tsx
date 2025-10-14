@@ -115,7 +115,7 @@ export default function Unsubscribe() {
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Unsubscribe from Job Alerts</h1>
             <p className="text-text-secondary">
-              We're sorry to see you go! You can unsubscribe from job alert emails below.
+              We&apos;re sorry to see you go! You can unsubscribe from job alert emails below.
             </p>
           </div>
 
@@ -163,7 +163,7 @@ export default function Unsubscribe() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h2 className="text-xl font-semibold text-foreground mb-2">You've Been Unsubscribed</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-2">You&apos;ve Been Unsubscribed</h2>
               <p className="text-text-secondary mb-6">
                 You will no longer receive job alert emails from us.
               </p>
