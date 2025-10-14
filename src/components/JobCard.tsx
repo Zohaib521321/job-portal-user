@@ -22,7 +22,7 @@ export default function JobCard({ id, title, company, location, type, salary, de
             <h3 className="text-xl font-semibold text-foreground">{title}</h3>
             {priority === 'high' && (
               <span className="px-2 py-0.5 bg-error/10 text-error text-xs font-medium rounded">
-                🔥 Featured
+                Featured
               </span>
             )}
           </div>

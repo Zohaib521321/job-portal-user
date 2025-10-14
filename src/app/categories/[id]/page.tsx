@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import JobCard from '@/components/JobCard';
+import JobAlertSubscription from '@/components/JobAlertSubscription';
 import Link from 'next/link';
 
 import { apiGet } from '@/lib/api';
@@ -163,6 +164,14 @@ export default function CategoryJobs() {
               <span>open positions</span>
             </div>
           </div>
+        )}
+
+        {/* Job Alert Subscription */}
+        {category && (
+          <JobAlertSubscription 
+            categoryId={category.id} 
+            categoryName={category.name} 
+          />
         )}
 
         {/* Loading State */}

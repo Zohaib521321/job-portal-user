@@ -42,6 +42,15 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, selectedType]);
 
+  // Auto-fetch when search term is cleared
+  useEffect(() => {
+    if (searchTerm === '') {
+      setCurrentPage(1);
+      fetchJobs();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm]);
+
   const fetchJobs = async () => {
     try {
       setIsLoading(true);
@@ -90,31 +99,45 @@ export default function Home() {
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-foreground mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 px-2">
             {settings.site_tagline ? (
               <span dangerouslySetInnerHTML={{ __html: settings.site_tagline.replace(/Dream Job/i, '<span class="text-primary">$&</span>') || settings.site_tagline }} />
             ) : (
               <>Find Your <span className="text-primary">Dream Job</span></>
             )}
           </h1>
-          <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+          <p className="text-text-secondary text-base sm:text-lg max-w-2xl mx-auto px-2">
             {settings.site_description || 'Browse thousands of job opportunities from top companies around the world'}
           </p>
         </div>
 
         {/* Search Bar */}
         <form onSubmit={handleSearch} className="max-w-4xl mx-auto mb-12">
-          <div className="flex gap-4">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by job title, company, or location..."
-              className="flex-1 bg-surface text-foreground border border-accent rounded-lg px-4 py-3 focus:outline-none focus:border-primary transition-colors"
-            />
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by job title, company, or location..."
+                className="w-full bg-surface text-foreground border border-accent rounded-lg px-4 py-3 pr-10 focus:outline-none focus:border-primary transition-colors"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-foreground transition-colors"
+                  aria-label="Clear search"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
             <button 
               type="submit"
-              className="bg-primary text-background font-semibold px-8 py-3 rounded-lg hover:bg-primary-dark transition-all duration-200"
+              className="bg-primary text-background font-semibold px-8 py-3 rounded-lg hover:bg-primary-dark transition-all duration-200 whitespace-nowrap"
             >
               Search
             </button>
@@ -122,10 +145,10 @@ export default function Home() {
         </form>
 
         {/* Filters */}
-        <div className="flex gap-4 mb-8 flex-wrap">
+        <div className="flex gap-2 sm:gap-4 mb-8 flex-wrap">
           <button 
             onClick={() => handleTypeFilter('all')}
-            className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+            className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-sm sm:text-base whitespace-nowrap ${
               selectedType === 'all' 
                 ? 'bg-primary text-background' 
                 : 'bg-surface text-text-secondary hover:bg-accent hover:text-foreground'
@@ -135,7 +158,7 @@ export default function Home() {
           </button>
           <button 
             onClick={() => handleTypeFilter('full-time')}
-            className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+            className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-sm sm:text-base whitespace-nowrap ${
               selectedType === 'full-time' 
                 ? 'bg-primary text-background' 
                 : 'bg-surface text-text-secondary hover:bg-accent hover:text-foreground'
@@ -145,7 +168,7 @@ export default function Home() {
           </button>
           <button 
             onClick={() => handleTypeFilter('contract')}
-            className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+            className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-sm sm:text-base whitespace-nowrap ${
               selectedType === 'contract' 
                 ? 'bg-primary text-background' 
                 : 'bg-surface text-text-secondary hover:bg-accent hover:text-foreground'
@@ -155,7 +178,7 @@ export default function Home() {
           </button>
           <button 
             onClick={() => handleTypeFilter('remote')}
-            className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+            className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-sm sm:text-base whitespace-nowrap ${
               selectedType === 'remote' 
                 ? 'bg-primary text-background' 
                 : 'bg-surface text-text-secondary hover:bg-accent hover:text-foreground'
@@ -165,7 +188,7 @@ export default function Home() {
           </button>
           <button 
             onClick={() => handleTypeFilter('internship')}
-            className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+            className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-sm sm:text-base whitespace-nowrap ${
               selectedType === 'internship' 
                 ? 'bg-primary text-background' 
                 : 'bg-surface text-text-secondary hover:bg-accent hover:text-foreground'
@@ -210,21 +233,21 @@ export default function Home() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2">
+              <div className="flex flex-wrap justify-center items-center gap-2">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 bg-surface text-foreground rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 sm:px-4 py-2 bg-surface text-foreground rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base whitespace-nowrap"
                 >
                   Previous
                 </button>
 
-                <div className="flex gap-2">
+                <div className="flex gap-1 sm:gap-2 flex-wrap justify-center">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                      className={`px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-sm sm:text-base ${
                         currentPage === page
                           ? 'bg-primary text-background'
                           : 'bg-surface text-foreground hover:bg-accent'
@@ -238,7 +261,7 @@ export default function Home() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-surface text-foreground rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 sm:px-4 py-2 bg-surface text-foreground rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base whitespace-nowrap"
                 >
                   Next
                 </button>
