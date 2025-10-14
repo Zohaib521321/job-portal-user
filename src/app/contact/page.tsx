@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { useSettings } from '@/contexts/SettingsContext';
 
 import { apiPost } from '@/lib/api';
 
@@ -15,7 +14,6 @@ interface ApiResponse {
 }
 
 export default function Contact() {
-  const { settings } = useSettings();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -90,8 +88,8 @@ export default function Contact() {
                 <div>
                   <h3 className="text-foreground font-semibold text-lg mb-2">Email Us</h3>
                   <p className="text-text-secondary mb-2">Our team is ready to help</p>
-                  <a href={`mailto:${settings.support_email || settings.contact_email || 'support@jobportal.com'}`} className="text-primary hover:text-primary-dark transition-colors">
-                    {settings.support_email || settings.contact_email || 'support@jobportal.com'}
+                  <a href={`mailto:${'support@jobportal.com'}`} className="text-primary hover:text-primary-dark transition-colors">
+                    {'support@jobportal.com'}
                   </a>
                 </div>
               </div>
@@ -107,8 +105,8 @@ export default function Contact() {
                 <div>
                   <h3 className="text-foreground font-semibold text-lg mb-2">Call Us</h3>
                   <p className="text-text-secondary mb-2">Mon-Fri from 8am to 5pm</p>
-                  <a href={`tel:${(settings.contact_phone || '+1 (555) 123-4567').replace(/[^0-9+]/g, '')}`} className="text-primary hover:text-primary-dark transition-colors">
-                    {settings.contact_phone || '+1 (555) 123-4567'}
+                  <a href={`tel:${ '+1 (555) 123-4567'}`} className="text-primary hover:text-primary-dark transition-colors">
+                    {'+1 (555) 123-4567'}
                   </a>
                 </div>
               </div>
@@ -126,7 +124,7 @@ export default function Contact() {
                   <h3 className="text-foreground font-semibold text-lg mb-2">Visit Us</h3>
                   <p className="text-text-secondary mb-2">Come say hello at our office</p>
                   <p className="text-text-secondary whitespace-pre-line">
-                    {settings.contact_address || '123 Business St.\nSan Francisco, CA 94105'}
+                    {'123 Business St.\nSan Francisco, CA 94105'}
                   </p>
                 </div>
               </div>

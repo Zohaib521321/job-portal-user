@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import JobCard from '@/components/JobCard';
 import Footer from '@/components/Footer';
-import { useSettings } from '@/contexts/SettingsContext';
 import { apiGet } from '@/lib/api';
 
 interface Job {
@@ -28,7 +27,6 @@ interface JobsApiResponse {
 }
 
 export default function Home() {
-  const { settings } = useSettings();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -100,14 +98,12 @@ export default function Home() {
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 px-2">
-            {settings.site_tagline ? (
-              <span dangerouslySetInnerHTML={{ __html: settings.site_tagline.replace(/Dream Job/i, '<span class="text-primary">$&</span>') || settings.site_tagline }} />
-            ) : (
+             
               <>Find Your <span className="text-primary">Dream Job</span></>
-            )}
+            
           </h1>
           <p className="text-text-secondary text-base sm:text-lg max-w-2xl mx-auto px-2">
-            {settings.site_description || 'Browse thousands of job opportunities from top companies around the world'}
+            {'Browse thousands of job opportunities from top companies around the world'}
           </p>
         </div>
 

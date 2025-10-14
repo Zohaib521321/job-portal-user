@@ -1,28 +1,29 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { settings } = useSettings();
+  const { theme } = useTheme();
 
   return (
     <nav className="bg-background border-b border-accent">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 group">
-            <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
-              <span className="text-background font-bold text-xl">
-                {(settings.site_name || 'JobPortal').charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <span className="text-foreground font-semibold text-xl">
-              {settings.site_name || 'JobPortal'}
-            </span>
+          <Link href="/" className="flex items-center space-x-3 group">
+            <Image
+              src={theme === 'dark' ? '/logo_light.png' : '/logo_dark.png'}
+              alt="Job Hunt Logo"
+              width={180}
+              height={180}
+              className="object-contain"
+            />
+           
           </Link>
 
           {/* Desktop Menu */}

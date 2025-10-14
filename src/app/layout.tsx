@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SettingsProvider } from "@/contexts/SettingsContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
 const inter = Inter({
@@ -10,8 +9,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Job Portal - Find Your Dream Job",
-  description: "Browse and apply for jobs from top companies",
+  title: "Job Hunt - Find Your Dream Job",
+  description: "Discover amazing job opportunities and connect with top employers",
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
@@ -26,9 +28,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ThemeProvider>
-          <SettingsProvider>
-            {children}
-          </SettingsProvider>
+          {children}
         </ThemeProvider>
       </body>
     </html>
