@@ -8,7 +8,7 @@ import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   return (
     <nav className="bg-background border-b border-accent">
@@ -17,13 +17,13 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
             <Image
-              src={theme === 'dark' ? '/logo_light.png' : '/logo_dark.png'}
+              src={resolvedTheme === 'dark' ? '/logo_dark.png' : '/logo_light.png'}
               alt="Job Hunt Logo"
               width={180}
               height={180}
               className="object-contain"
             />
-           
+          
           </Link>
 
           {/* Desktop Menu */}
