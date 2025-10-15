@@ -116,4 +116,4 @@ MIT
 
 ## Support
 
-For support, email support@jobportal.com
+For support, email  jobhuntofficial.pk@gmail.com

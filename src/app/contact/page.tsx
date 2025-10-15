@@ -88,13 +88,13 @@ export default function Contact() {
                 <div>
                   <h3 className="text-foreground font-semibold text-lg mb-2">Email Us</h3>
                   <p className="text-text-secondary mb-2">Our team is ready to help</p>
-                  <a href={`mailto:${'support@jobportal.com'}`} className="text-primary hover:text-primary-dark transition-colors">
-                    {'support@jobportal.com'}
+                  <a href={`mailto:${' jobhuntofficial.pk@gmail.com'}`} className="text-primary hover:text-primary-dark transition-colors">
+                    {' jobhuntofficial.pk@gmail.com'}
                   </a>
                 </div>
               </div>
             </div>
-
+{/* 
             <div className="bg-surface rounded-lg p-8 shadow-lg">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -110,9 +110,9 @@ export default function Contact() {
                   </a>
                 </div>
               </div>
-            </div>
+            </div> */}
 
-            <div className="bg-surface rounded-lg p-8 shadow-lg">
+            {/* <div className="bg-surface rounded-lg p-8 shadow-lg">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                   <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,9 +128,9 @@ export default function Contact() {
                   </p>
                 </div>
               </div>
-            </div>
+            </div> */}
 
-            <div className="bg-surface rounded-lg p-8 shadow-lg">
+            {/* <div className="bg-surface rounded-lg p-8 shadow-lg">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                   <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +145,7 @@ export default function Contact() {
                   </button>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {submitStatus && (
