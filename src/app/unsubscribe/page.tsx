@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { apiPost } from '@/lib/api';
 
-export default function Unsubscribe() {
+function UnsubscribeContent() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -256,6 +256,21 @@ export default function Unsubscribe() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function Unsubscribe() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+          <p className="text-text-secondary">Loading...</p>
+        </div>
+      </div>
+    }>
+      <UnsubscribeContent />
+    </Suspense>
   );
 }
 
