@@ -1,0 +1,30 @@
+{
+  "name": "jobhunt.pk - Find the Best Jobs in Pakistan",
+  "short_name": "jobhunt.pk",
+  "description": "Find the best job opportunities in Pakistan. Browse thousands of jobs from top companies across all industries and locations.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0E11",
+  "theme_color": "#FCD535",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo_light.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["business", "productivity", "employment"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "scope": "/",
+  "screenshots": []
+}
+

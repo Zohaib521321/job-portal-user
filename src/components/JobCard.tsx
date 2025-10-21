@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { getJobUrl } from '@/lib/slugify';
 
 interface JobCardProps {
   id: string;
@@ -16,23 +17,26 @@ interface JobCardProps {
 export default function JobCard({ id, title, company, location, type, salary, description, priority }: JobCardProps) {
   return (
     <div className="bg-surface rounded-lg p-6 hover:border hover:border-primary transition-all duration-200 shadow-lg hover:shadow-xl">
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-xl font-semibold text-foreground">{title}</h3>
-            {priority === 'high' && (
-              <span className="px-2 py-0.5 bg-error/10 text-error text-xs font-medium rounded">
-                Featured
-              </span>
-            )}
-          </div>
-        </div>
-        <span className="text-primary text-sm font-medium px-3 py-1 bg-primary/10 rounded-full ml-2">
+      {/* Badges Row - Featured & Job Type */}
+      <div className="flex items-center gap-2 mb-3">
+        {priority === 'high' && (
+          <span className="px-2.5 py-1 bg-error/10 text-error text-xs font-semibold rounded-md border border-error/20">
+            ⭐ Featured
+          </span>
+        )}
+        <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full border border-primary/20 capitalize">
           {type}
         </span>
+        <div className="flex-1"></div>
       </div>
+
+      {/* Job Title */}
+      <h3 className="text-xl font-bold text-foreground mb-2 line-clamp-2 hover:text-primary transition-colors">
+        {title}
+      </h3>
       
-      <p className="text-text-secondary mb-2">{company}</p>
+      {/* Company Name */}
+      <p className="text-primary font-semibold mb-3">{company}</p>
       
       <div className="flex items-center gap-4 text-text-secondary text-sm mb-4">
         <div className="flex items-center gap-1">
@@ -55,7 +59,7 @@ export default function JobCard({ id, title, company, location, type, salary, de
       <p className="text-text-secondary text-sm mb-4 line-clamp-2">{description}</p>
       
       <Link 
-        href={`/jobs/${id}`}
+        href={getJobUrl(parseInt(id), title, company)}
         className="inline-block bg-primary text-background font-semibold px-6 py-2 rounded-lg hover:bg-primary-dark transition-all duration-200"
       >
         Apply Now

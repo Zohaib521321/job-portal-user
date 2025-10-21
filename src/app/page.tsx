@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import JobCard from '@/components/JobCard';
 import Footer from '@/components/Footer';
 import { apiGet } from '@/lib/api';
+import { SITE_CONFIG, generateOrganizationSchema, generateWebsiteSchema } from '@/lib/seo';
 
 interface Job {
   id: number;
@@ -34,6 +35,56 @@ export default function Home() {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedType, setSelectedType] = useState('all');
   const limit = 9; // Jobs per page
+
+  // Set SEO metadata for homepage
+  useEffect(() => {
+    document.title = `${SITE_CONFIG.name} - Find the Best Jobs in Pakistan`;
+    
+    const updateMetaTag = (attribute: string, attributeValue: string, content: string) => {
+      if (typeof document === 'undefined') return;
+      let element = document.querySelector(`meta[${attribute}="${attributeValue}"]`);
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(attribute, attributeValue);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
+
+    const addStructuredData = (id: string, data: any) => {
+      if (typeof document === 'undefined') return;
+      let script = document.getElementById(id) as HTMLScriptElement;
+      if (!script) {
+        script = document.createElement('script');
+        script.id = id;
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+      }
+      script.textContent = JSON.stringify(data);
+    };
+
+    // Meta tags
+    updateMetaTag('name', 'description', SITE_CONFIG.description);
+    updateMetaTag('name', 'keywords', 'jobs in Pakistan, job search Pakistan, career opportunities, employment Pakistan, job portal, job listings, career Pakistan, find jobs, job vacancies');
+    
+    // Open Graph
+    updateMetaTag('property', 'og:title', `${SITE_CONFIG.name} - Find the Best Jobs in Pakistan`);
+    updateMetaTag('property', 'og:description', SITE_CONFIG.description);
+    updateMetaTag('property', 'og:url', SITE_CONFIG.url);
+    updateMetaTag('property', 'og:type', 'website');
+    updateMetaTag('property', 'og:site_name', SITE_CONFIG.name);
+    updateMetaTag('property', 'og:image', SITE_CONFIG.ogImage);
+    
+    // Twitter Card
+    updateMetaTag('name', 'twitter:card', 'summary_large_image');
+    updateMetaTag('name', 'twitter:site', SITE_CONFIG.twitterHandle);
+    updateMetaTag('name', 'twitter:title', `${SITE_CONFIG.name} - Find the Best Jobs in Pakistan`);
+    updateMetaTag('name', 'twitter:description', SITE_CONFIG.description);
+
+    // Structured data
+    addStructuredData('organization-schema', generateOrganizationSchema());
+    addStructuredData('website-schema', generateWebsiteSchema());
+  }, []);
 
   useEffect(() => {
     fetchJobs();

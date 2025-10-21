@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Clean Resume</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Calibri, Arial, sans-serif;
+            line-height: 1.7;
+            color: #2c3e50;
+            background: #fff;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 50px 70px;
+        }
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+        }
+        .target-role {
+            font-size: 15px;
+            font-weight: 600;
+            color: #3498db;
+            margin-bottom: 12px;
+        }
+        h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 28px;
+            margin-bottom: 14px;
+            padding-bottom: 6px;
+            border-bottom: 3px solid #3498db;
+            color: #2c3e50;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #1a1a1a;
+        }
+        .contact-info {
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #555;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+        }
+        .contact-info a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+        .social-links {
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        .social-links a {
+            color: #3498db;
+            text-decoration: none;
+            margin-right: 16px;
+        }
+        .social-links a:hover {
+            text-decoration: underline;
+        }
+        .objective {
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #444;
+        }
+        .experience-item, .education-item {
+            margin-bottom: 20px;
+        }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+        .job-title, .degree {
+            font-weight: 700;
+            font-size: 15px;
+            color: #1a1a1a;
+        }
+        .company, .institute {
+            font-size: 14px;
+            color: #555;
+        }
+        .date {
+            font-size: 13px;
+            color: #777;
+            font-style: italic;
+        }
+        .description {
+            font-size: 13px;
+            margin-top: 8px;
+            line-height: 1.6;
+            color: #444;
+        }
+        .description ul {
+            margin-left: 20px;
+            margin-top: 6px;
+        }
+        .description li {
+            margin-bottom: 6px;
+        }
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            font-size: 13px;
+        }
+        .skill-item {
+            padding: 4px 0;
+        }
+        .skill-item::before {
+            content: "▪";
+            margin-right: 8px;
+            color: #3498db;
+        }
+        .languages-list {
+            margin-bottom: 8px;
+        }
+        .languages-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            font-size: 13px;
+        }
+        .language-item {
+            padding: 4px 0;
+        }
+        .language-item::before {
+            content: "▪";
+            margin-right: 8px;
+            color: #3498db;
+        }
+        .cert-item {
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        .cert-item strong {
+            color: #1a1a1a;
+        }
+        .project-item {
+            margin-bottom: 20px;
+        }
+        .project-title {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 2px;
+            color: #1a1a1a;
+        }
+        .project-tech {
+            font-size: 12px;
+            color: #777;
+            font-style: italic;
+            margin-top: 6px;
+        }
+        .project-link {
+            font-size: 12px;
+            color: #3498db;
+            text-decoration: none;
+            margin-top: 6px;
+            display: inline-block;
+        }
+        .project-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Your Name</h1>
+    <div class="contact-info">
+        <div class="contact-item">Email | Phone | City</div>
+    </div>
+
+    <h2>Professional Summary</h2>
+    <div class="objective">
+        <p>Your professional summary goes here</p>
+    </div>
+
+    <h2>Professional Experience</h2>
+    
+    <div class="experience-item">
+        <div class="header-row">
+            <h3 class="job-title">Job Title</h3>
+            <span class="date">Dates</span>
+        </div>
+        <p class="company">Company Name</p>
+        <div class="description">
+            <p>Description</p>
+        </div>
+    </div>
+
+    <h2>Education</h2>
+    
+    <div class="education-item">
+        <div class="header-row">
+            <h3 class="degree">Degree</h3>
+            <span class="date">Years</span>
+        </div>
+        <p class="institute">Institution</p>
+    </div>
+
+    <h2>Technical Skills</h2>
+    <div class="skills-list">
+        <div class="skills-grid">
+            <div class="skill-item">Skill 1</div>
+        </div>
+    </div>
+
+    <h2>Projects</h2>
+    
+    <div class="project-item">
+        <h3 class="project-title">Project Title</h3>
+        <p class="date">Dates</p>
+    </div>
+
+    <h2>Languages</h2>
+    <div class="languages-list">
+        <div class="languages-grid">
+            <div class="language-item">Language</div>
+        </div>
+    </div>
+
+    <h2>Certifications</h2>
+    <div class="cert-item">
+        <p><strong>Certification Title</strong> - Year</p>
+    </div>
+</body>
+</html>
+

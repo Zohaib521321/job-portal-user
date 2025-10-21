@@ -4,11 +4,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
 import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { resolvedTheme } = useTheme();
+  const { user } = useAuth();
 
   return (
     <nav className="bg-background border-b border-accent">
@@ -58,6 +60,24 @@ export default function Navbar() {
             >
               Contact
             </Link>
+            
+            {/* Resume Builder - Conditional based on auth */}
+            {user ? (
+              <Link 
+                href="/resume-builder" 
+                className="text-foreground hover:text-primary transition-all duration-200 hover:underline underline-offset-4"
+              >
+                Resume Builder
+              </Link>
+            ) : (
+              <Link 
+                href="/auth/login" 
+                className="text-foreground hover:text-primary transition-all duration-200 hover:underline underline-offset-4"
+              >
+                Resume Builder
+              </Link>
+            )}
+            
             <ThemeToggle />
           </div>
 
@@ -114,6 +134,26 @@ export default function Navbar() {
             >
               Contact
             </Link>
+            
+            {/* Resume Builder - Conditional based on auth */}
+            {user ? (
+              <Link 
+                href="/resume-builder" 
+                className="block text-foreground hover:text-primary transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Resume Builder
+              </Link>
+            ) : (
+              <Link 
+                href="/auth/login" 
+                className="block text-foreground hover:text-primary transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Login
+              </Link>
+            )}
+            
             <div className="pt-2">
               <ThemeToggle />
             </div>

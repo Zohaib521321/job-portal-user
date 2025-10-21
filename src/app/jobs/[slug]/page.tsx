@@ -1,12 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import Head from 'next/head';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 
 import { apiGet } from '@/lib/api';
+import { extractJobId, generateJobSlug } from '@/lib/slugify';
+import { 
+  SITE_CONFIG, 
+  generateJobPostingSchema, 
+  generateBreadcrumbSchema,
+  truncateDescription,
+  generateJobKeywords 
+} from '@/lib/seo';
 
 const SITE_URL = 'https://jobhunt.pk';
 
@@ -37,16 +46,111 @@ interface JobApiResponse {
 
 export default function JobDetails() {
   const params = useParams();
+  const router = useRouter();
   const [job, setJob] = useState<Job | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [copySuccess, setCopySuccess] = useState(false);
 
-  useEffect(() => {
-    if (params.id) {
-      fetchJob(params.id as string);
+  // Helper function to update meta tags
+  const updateMetaTag = (attribute: string, attributeValue: string, content: string) => {
+    if (typeof document === 'undefined') return;
+    
+    let element = document.querySelector(`meta[${attribute}="${attributeValue}"]`);
+    if (!element) {
+      element = document.createElement('meta');
+      element.setAttribute(attribute, attributeValue);
+      document.head.appendChild(element);
     }
-  }, [params.id]);
+    element.setAttribute('content', content);
+  };
+
+  // Helper function to update link tags
+  const updateLinkTag = (rel: string, href: string) => {
+    if (typeof document === 'undefined') return;
+    
+    let element = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement;
+    if (!element) {
+      element = document.createElement('link');
+      element.setAttribute('rel', rel);
+      document.head.appendChild(element);
+    }
+    element.setAttribute('href', href);
+  };
+
+  // Helper function to add JSON-LD structured data
+  const addStructuredData = (id: string, data: any) => {
+    if (typeof document === 'undefined') return;
+    
+    let script = document.getElementById(id) as HTMLScriptElement;
+    if (!script) {
+      script = document.createElement('script');
+      script.id = id;
+      script.type = 'application/ld+json';
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(data);
+  };
+
+  // Update SEO metadata when job is loaded
+  useEffect(() => {
+    if (job) {
+      const seoSlug = generateJobSlug(job.id, job.title, job.company_name);
+      const pageTitle = `${job.title} at ${job.company_name} - ${job.location} | ${SITE_CONFIG.name}`;
+      const description = truncateDescription(job.description);
+      const keywords = generateJobKeywords(job);
+      const pageUrl = `${SITE_URL}/jobs/${seoSlug}`;
+
+      // Update document title
+      document.title = pageTitle;
+
+      // Update or create meta tags
+      updateMetaTag('name', 'description', description);
+      updateMetaTag('name', 'keywords', keywords.join(', '));
+      
+      // Open Graph tags
+      updateMetaTag('property', 'og:title', pageTitle);
+      updateMetaTag('property', 'og:description', description);
+      updateMetaTag('property', 'og:url', pageUrl);
+      updateMetaTag('property', 'og:type', 'article');
+      updateMetaTag('property', 'og:site_name', SITE_CONFIG.name);
+      updateMetaTag('property', 'article:published_time', new Date(job.posted_at).toISOString());
+      
+      // Twitter Card tags
+      updateMetaTag('name', 'twitter:card', 'summary_large_image');
+      updateMetaTag('name', 'twitter:title', pageTitle);
+      updateMetaTag('name', 'twitter:description', description);
+      
+      // Canonical URL
+      updateLinkTag('canonical', pageUrl);
+
+      // Add JSON-LD structured data
+      addStructuredData('job-posting-schema', generateJobPostingSchema({
+        ...job,
+        slug: seoSlug
+      }));
+      
+      addStructuredData('breadcrumb-schema', generateBreadcrumbSchema([
+        { name: 'Home', url: '/' },
+        { name: 'Jobs', url: '/' },
+        { name: job.title, url: `/jobs/${seoSlug}` }
+      ]));
+    }
+  }, [job]);
+
+  useEffect(() => {
+    if (params.slug) {
+      const slug = params.slug as string;
+      const jobId = extractJobId(slug);
+      
+      if (jobId) {
+        fetchJob(jobId.toString());
+      } else {
+        setError('Invalid job URL');
+        setIsLoading(false);
+      }
+    }
+  }, [params.slug]);
 
   const fetchJob = async (id: string) => {
     try {
@@ -55,6 +159,16 @@ export default function JobDetails() {
 
       if (data.success) {
         setJob(data.data);
+        
+        // Redirect to SEO-friendly URL if accessing via numeric ID only
+        const currentSlug = params.slug as string;
+        const jobId = extractJobId(currentSlug);
+        const seoSlug = generateJobSlug(data.data.id, data.data.title, data.data.company_name);
+        
+        // If the current slug is just the ID (no title), redirect to SEO-friendly URL
+        if (jobId && currentSlug === jobId.toString()) {
+          router.replace(`/jobs/${seoSlug}`, { scroll: false });
+        }
       } else {
         setError('Job not found');
       }
@@ -105,7 +219,9 @@ export default function JobDetails() {
     day: 'numeric'
   });
 
-  const jobUrl = `${SITE_URL}/jobs/${job.id}`;
+  // Generate SEO-friendly URL for sharing
+  const seoSlug = generateJobSlug(job.id, job.title, job.company_name);
+  const jobUrl = `${SITE_URL}/jobs/${seoSlug}`;
   const jobTitle = `${job.title} at ${job.company_name}`;
 
   const handleShare = (platform: string) => {
