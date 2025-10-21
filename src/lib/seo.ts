@@ -77,7 +77,7 @@ export function generateMetadata(props: SEOProps): Metadata {
       canonical: canonicalUrl,
     },
     openGraph: {
-      type: type as any,
+      type: type as 'website' | 'article',
       locale: SITE_CONFIG.locale,
       url: pageUrl,
       siteName: SITE_CONFIG.name,

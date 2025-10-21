@@ -51,7 +51,7 @@ export default function Home() {
       element.setAttribute('content', content);
     };
 
-    const addStructuredData = (id: string, data: any) => {
+    const addStructuredData = (id: string, data: Record<string, unknown>) => {
       if (typeof document === 'undefined') return;
       let script = document.getElementById(id) as HTMLScriptElement;
       if (!script) {

@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Head from 'next/head';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
@@ -79,7 +78,7 @@ export default function JobDetails() {
   };
 
   // Helper function to add JSON-LD structured data
-  const addStructuredData = (id: string, data: any) => {
+  const addStructuredData = (id: string, data: Record<string, unknown>) => {
     if (typeof document === 'undefined') return;
     
     let script = document.getElementById(id) as HTMLScriptElement;
@@ -138,21 +137,7 @@ export default function JobDetails() {
     }
   }, [job]);
 
-  useEffect(() => {
-    if (params.slug) {
-      const slug = params.slug as string;
-      const jobId = extractJobId(slug);
-      
-      if (jobId) {
-        fetchJob(jobId.toString());
-      } else {
-        setError('Invalid job URL');
-        setIsLoading(false);
-      }
-    }
-  }, [params.slug]);
-
-  const fetchJob = async (id: string) => {
+  const fetchJob = useCallback(async (id: string) => {
     try {
       setIsLoading(true);
       const data = await apiGet<JobApiResponse>(`/api/jobs/${id}`);
@@ -178,7 +163,21 @@ export default function JobDetails() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [params.slug, router]);
+
+  useEffect(() => {
+    if (params.slug) {
+      const slug = params.slug as string;
+      const jobId = extractJobId(slug);
+      
+      if (jobId) {
+        fetchJob(jobId.toString());
+      } else {
+        setError('Invalid job URL');
+        setIsLoading(false);
+      }
+    }
+  }, [params.slug, fetchJob]);
 
   if (isLoading) {
     return (
