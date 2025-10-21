@@ -101,6 +101,47 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Continue with static pages even if job fetch fails
   }
 
-  return [...staticPages, ...jobPages];
+  // Fetch categories dynamically with proper API key authentication
+  let categoryPages: MetadataRoute.Sitemap = [];
+  
+  try {
+    // Fetch all active categories from API using apiGet (includes API key)
+    const data = await apiGet<{
+      success: boolean;
+      data: Array<{
+        id: number;
+        name: string;
+        updated_at?: string;
+      }>;
+    }>('/api/categories?status=active');
+    
+    if (data.success && Array.isArray(data.data)) {
+      categoryPages = data.data.map((category) => {
+        // Generate SEO-friendly slug
+        const slugify = (text: string) => 
+          text.toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-+|-+$/g, '');
+        
+        const nameSlug = slugify(category.name);
+        const slug = `${category.id}-${nameSlug}`;
+        
+        return {
+          url: `${baseUrl}/categories/${slug}`,
+          lastModified: new Date(category.updated_at || Date.now()),
+          changeFrequency: 'weekly' as const,
+          priority: 0.8,
+        };
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching categories for sitemap:', error);
+    // Continue even if category fetch fails
+  }
+
+  return [...staticPages, ...jobPages, ...categoryPages];
 }
 

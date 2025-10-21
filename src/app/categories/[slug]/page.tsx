@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import JobCard from '@/components/JobCard';
@@ -9,6 +9,7 @@ import JobAlertSubscription from '@/components/JobAlertSubscription';
 import Link from 'next/link';
 
 import { apiGet } from '@/lib/api';
+import { extractCategoryId, generateCategorySlug } from '@/lib/slugify';
 
 interface Category {
   id: number;
@@ -46,6 +47,7 @@ interface JobsApiResponse {
 
 export default function CategoryJobs() {
   const params = useParams();
+  const router = useRouter();
   const [category, setCategory] = useState<Category | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,20 +56,22 @@ export default function CategoryJobs() {
   const [error, setError] = useState('');
   const limit = 9;
 
-  useEffect(() => {
-    if (params.id) {
-      fetchCategory();
-      fetchCategoryJobs();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.id, currentPage]);
-
-  const fetchCategory = async () => {
+  const fetchCategory = useCallback(async (id: string) => {
     try {
-      const data = await apiGet<CategoryApiResponse>(`/api/categories/${params.id}`);
+      const data = await apiGet<CategoryApiResponse>(`/api/categories/${id}`);
 
       if (data.success) {
         setCategory(data.data);
+        
+        // Redirect to SEO-friendly URL if accessing via numeric ID only
+        const currentSlug = params.slug as string;
+        const categoryId = extractCategoryId(currentSlug);
+        const seoSlug = generateCategorySlug(data.data.id, data.data.name);
+        
+        // If the current slug is just the ID (no name), redirect to SEO-friendly URL
+        if (categoryId && currentSlug === categoryId.toString()) {
+          router.replace(`/categories/${seoSlug}`, { scroll: false });
+        }
       } else {
         setError('Category not found');
       }
@@ -75,13 +79,13 @@ export default function CategoryJobs() {
       console.error('Error fetching category:', err);
       setError('Failed to load category');
     }
-  };
+  }, [params.slug, router]);
 
-  const fetchCategoryJobs = async () => {
+  const fetchCategoryJobs = useCallback(async (categoryId: string) => {
     try {
       setIsLoading(true);
       const data = await apiGet<JobsApiResponse>(
-        `/api/jobs?category_id=${params.id}&status=active&page=${currentPage}&limit=${limit}`
+        `/api/jobs?category_id=${categoryId}&status=active&page=${currentPage}&limit=${limit}`
       );
 
       if (data.success) {
@@ -93,7 +97,22 @@ export default function CategoryJobs() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage]);
+
+  useEffect(() => {
+    if (params.slug) {
+      const slug = params.slug as string;
+      const categoryId = extractCategoryId(slug);
+      
+      if (categoryId) {
+        fetchCategory(categoryId.toString());
+        fetchCategoryJobs(categoryId.toString());
+      } else {
+        setError('Invalid category URL');
+        setIsLoading(false);
+      }
+    }
+  }, [params.slug, currentPage, fetchCategory, fetchCategoryJobs]);
 
   if (error) {
     return (

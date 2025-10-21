@@ -46,3 +46,37 @@ export function getJobUrl(id: number, title?: string, company?: string): string 
   return `/jobs/${id}`;
 }
 
+/**
+ * Generate SEO-friendly category URL slug: "id-category-name"
+ */
+export function generateCategorySlug(id: number, name: string): string {
+  const nameSlug = slugify(name);
+  return `${id}-${nameSlug}`;
+}
+
+/**
+ * Extract category ID from slug
+ * Supports both formats:
+ * - "5" (old format)
+ * - "5-software-development" (new SEO format)
+ */
+export function extractCategoryId(slug: string): number | null {
+  const match = slug.match(/^(\d+)/);
+  if (match) {
+    return parseInt(match[1], 10);
+  }
+  return null;
+}
+
+/**
+ * Build category URL path (for use with Next.js Link)
+ */
+export function getCategoryUrl(id: number, name?: string): string {
+  if (name) {
+    // Generate SEO-friendly URL
+    return `/categories/${generateCategorySlug(id, name)}`;
+  }
+  // Fallback to simple ID format
+  return `/categories/${id}`;
+}
+

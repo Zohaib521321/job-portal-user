@@ -41,8 +41,12 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: '/favicon.svg',
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
+      { url: '/favicon.svg', sizes: 'any', type: 'image/svg+xml' },
+    ],
     apple: '/logo_light.png',
+    shortcut: '/favicon.ico',
   },
   manifest: '/manifest.json',
   openGraph: {

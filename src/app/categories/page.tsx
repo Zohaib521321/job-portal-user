@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 
 import { apiGet } from '@/lib/api';
+import { getCategoryUrl } from '@/lib/slugify';
 
 interface Category {
   id: number;
@@ -101,7 +102,7 @@ export default function Categories() {
           {categories.map((category) => (
             <Link
               key={category.id}
-              href={`/categories/${category.id}`}
+              href={getCategoryUrl(category.id, category.name)}
               className="bg-surface rounded-lg p-6 hover:border hover:border-primary transition-all duration-200 shadow-lg hover:shadow-xl group"
             >
               <div className="text-4xl mb-4">{category.icon || '🏷️'}</div>
