@@ -106,7 +106,258 @@ export function generateMetadata(props: SEOProps): Metadata {
 }
 
 /**
- * Generate JobPosting structured data (JSON-LD)
+ * Parse salary information from various formats
+ */
+export function parseSalary(salaryRange?: string): {
+  minValue?: number;
+  maxValue?: number;
+  currency: string;
+  unitText: string;
+} | null {
+  if (!salaryRange) return null;
+
+  const salary = salaryRange.toLowerCase().trim();
+  
+  // Extract currency
+  const currency = salary.includes('pkr') || salary.includes('rs') || salary.includes('rupees') ? 'PKR' : 'PKR';
+  
+  // Extract numbers from various formats
+  const numberRegex = /(\d+(?:,\d{3})*(?:\.\d+)?)/g;
+  const numbers = salary.match(numberRegex);
+  
+  if (!numbers || numbers.length === 0) return null;
+  
+  // Convert to numbers (remove commas)
+  const numericValues = numbers.map(num => parseFloat(num.replace(/,/g, '')));
+  
+  // Handle different formats
+  let minValue: number | undefined;
+  let maxValue: number | undefined;
+  
+  if (numericValues.length === 1) {
+    // Single value: "40k", "PKR 40,000"
+    minValue = numericValues[0];
+  } else if (numericValues.length === 2) {
+    // Range: "40k-50k", "40,000 - 50,000"
+    minValue = Math.min(...numericValues);
+    maxValue = Math.max(...numericValues);
+  } else {
+    // Multiple values, take first two
+    minValue = Math.min(numericValues[0], numericValues[1]);
+    maxValue = Math.max(numericValues[0], numericValues[1]);
+  }
+  
+  // Convert K notation to full numbers
+  if (salary.includes('k') && minValue && minValue < 1000) {
+    minValue = minValue * 1000;
+  }
+  if (salary.includes('k') && maxValue && maxValue < 1000) {
+    maxValue = maxValue * 1000;
+  }
+  
+  return {
+    minValue,
+    maxValue,
+    currency,
+    unitText: 'MONTH'
+  };
+}
+
+/**
+ * Parse location information to extract address components
+ */
+export function parseLocation(location: string): {
+  addressLocality: string;
+  addressRegion?: string;
+  addressCountry: string;
+  postalCode?: string;
+  streetAddress?: string;
+} {
+  if (!location) {
+    return {
+      addressLocality: 'Pakistan',
+      addressCountry: 'PK'
+    };
+  }
+
+  const loc = location.trim();
+  
+  // Common Pakistani cities and their regions
+  const cityRegionMap: Record<string, string> = {
+    // Major cities
+    'karachi': 'Sindh',
+    'lahore': 'Punjab',
+    'islamabad': 'Islamabad Capital Territory',
+    'rawalpindi': 'Punjab',
+    'faisalabad': 'Punjab',
+    'multan': 'Punjab',
+    'peshawar': 'Khyber Pakhtunkhwa',
+    'quetta': 'Balochistan',
+    'hyderabad': 'Sindh',
+    'sukkur': 'Sindh',
+    'larkana': 'Sindh',
+    'nawabshah': 'Sindh',
+    'mardan': 'Khyber Pakhtunkhwa',
+    'swat': 'Khyber Pakhtunkhwa',
+    
+    // Punjab cities
+    'sialkot': 'Punjab',
+    'gujranwala': 'Punjab',
+    'sargodha': 'Punjab',
+    'jhelum': 'Punjab',
+    'sahiwal': 'Punjab',
+    'bahawalpur': 'Punjab',
+    'gujrat': 'Punjab',
+    'kasur': 'Punjab',
+    'rahim yar khan': 'Punjab',
+    'chakwal': 'Punjab',
+    'sheikhupura': 'Punjab',
+    'jhang': 'Punjab',
+    'daska': 'Punjab',
+    'pakpattan': 'Punjab',
+    'okara': 'Punjab',
+    'burewala': 'Punjab',
+    'vehari': 'Punjab',
+    'attock': 'Punjab',
+    'kot addu': 'Punjab',
+    'khanpur': 'Punjab',
+    'hasan abdal': 'Punjab',
+    'kamoke': 'Punjab',
+    'gojra': 'Punjab',
+    'muridke': 'Punjab',
+    'bahawalnagar': 'Punjab',
+    'chishtian': 'Punjab',
+    'bhalwal': 'Punjab',
+    'kot mithan': 'Punjab',
+    'mamoori': 'Punjab',
+    'ahmadpur east': 'Punjab',
+    'kamar mashani': 'Punjab',
+    'chunian': 'Punjab',
+    'kot samaba': 'Punjab',
+    'dipalpur': 'Punjab',
+    'pindi bhattian': 'Punjab',
+    'bhawana': 'Punjab',
+    'kot radha kishan': 'Punjab',
+    'renala khurd': 'Punjab',
+    'kot ishaq': 'Punjab',
+    'dunga bunga': 'Punjab',
+    'dullewala': 'Punjab',
+    'chak jhumra': 'Punjab',
+    'kot ghulam muhammad': 'Punjab',
+    'kanganpur': 'Punjab',
+    'khanewal': 'Punjab',
+    'jauharabad': 'Punjab',
+    'pattoki': 'Punjab',
+    'lodhran': 'Punjab',
+    'bhakkar': 'Punjab',
+    'arifwala': 'Punjab',
+    'gujar khan': 'Punjab',
+    'qila didar singh': 'Punjab',
+    'kot mumin': 'Punjab',
+    'hasilpur': 'Punjab',
+    'kharian': 'Punjab',
+    'ahmadnagar': 'Punjab',
+    'jaranwala': 'Punjab',
+    
+    // Sindh cities
+    'gambat': 'Sindh',
+    'naushahro firoz': 'Sindh',
+    'shikarpur': 'Sindh',
+    'tando adam': 'Sindh',
+    'kandhkot': 'Sindh',
+    'moro': 'Sindh',
+    'mirpur khas': 'Sindh',
+    'sanghar': 'Sindh',
+    'tando allahyar': 'Sindh',
+    'badin': 'Sindh',
+    'thatta': 'Sindh',
+    'matli': 'Sindh',
+    'tando muhammad khan': 'Sindh',
+    'ubauro': 'Sindh',
+    'shahdadpur': 'Sindh',
+    'hala': 'Sindh',
+    'kotri': 'Sindh',
+    'mirpur bathoro': 'Sindh',
+    'tando jam': 'Sindh',
+    'digri': 'Sindh',
+    'khipro': 'Sindh',
+    'sakrand': 'Sindh',
+    'sujawal': 'Sindh',
+    'shahdadkot': 'Sindh'
+  };
+
+  // Try to find city and region
+  const lowerLoc = loc.toLowerCase();
+  let addressRegion: string | undefined;
+  let addressLocality = loc;
+  
+  // Check for exact matches first
+  for (const [city, region] of Object.entries(cityRegionMap)) {
+    if (lowerLoc.includes(city)) {
+      addressRegion = region;
+      addressLocality = city.charAt(0).toUpperCase() + city.slice(1);
+      break;
+    }
+  }
+  
+  // If no region found, try to extract from common patterns
+  if (!addressRegion) {
+    if (lowerLoc.includes('punjab') || lowerLoc.includes('lahore') || lowerLoc.includes('karachi')) {
+      addressRegion = 'Punjab';
+    } else if (lowerLoc.includes('sindh') || lowerLoc.includes('karachi') || lowerLoc.includes('hyderabad')) {
+      addressRegion = 'Sindh';
+    } else if (lowerLoc.includes('kpk') || lowerLoc.includes('peshawar') || lowerLoc.includes('mardan')) {
+      addressRegion = 'Khyber Pakhtunkhwa';
+    } else if (lowerLoc.includes('balochistan') || lowerLoc.includes('quetta')) {
+      addressRegion = 'Balochistan';
+    } else if (lowerLoc.includes('islamabad')) {
+      addressRegion = 'Islamabad Capital Territory';
+    }
+  }
+
+  return {
+    addressLocality: addressLocality,
+    addressRegion,
+    addressCountry: 'PK',
+    // For Pakistani addresses, we typically don't have postal codes in job listings
+    // but we can try to extract if present
+    postalCode: extractPostalCode(loc),
+    // Street address is rarely provided in job listings
+    streetAddress: extractStreetAddress(loc)
+  };
+}
+
+/**
+ * Extract postal code from location string
+ */
+function extractPostalCode(location: string): string | undefined {
+  // Pakistani postal codes are 5 digits
+  const postalCodeMatch = location.match(/\b\d{5}\b/);
+  return postalCodeMatch ? postalCodeMatch[0] : undefined;
+}
+
+/**
+ * Extract street address from location string
+ */
+function extractStreetAddress(location: string): string | undefined {
+  // Look for common address patterns
+  const addressPatterns = [
+    /\d+\s+[a-zA-Z\s]+(?:street|st|road|rd|avenue|ave|boulevard|blvd|lane|ln|drive|dr)/i,
+    /[a-zA-Z\s]+(?:street|st|road|rd|avenue|ave|boulevard|blvd|lane|ln|drive|dr)\s+\d+/i
+  ];
+  
+  for (const pattern of addressPatterns) {
+    const match = location.match(pattern);
+    if (match) {
+      return match[0].trim();
+    }
+  }
+  
+  return undefined;
+}
+
+/**
+ * Generate JobPosting structured data (JSON-LD) with complete address and salary information
  */
 export function generateJobPostingSchema(job: {
   id: number;
@@ -123,6 +374,12 @@ export function generateJobPostingSchema(job: {
   const validThrough = new Date(
     new Date(job.posted_at).getTime() + 90 * 24 * 60 * 60 * 1000
   ).toISOString(); // 90 days validity
+
+  // Parse location for complete address
+  const addressInfo = parseLocation(job.location);
+  
+  // Parse salary information
+  const salaryInfo = parseSalary(job.salary_range);
 
   const schema = {
     '@context': 'https://schema.org',
@@ -146,18 +403,23 @@ export function generateJobPostingSchema(job: {
       '@type': 'Place',
       address: {
         '@type': 'PostalAddress',
-        addressLocality: job.location,
-        addressCountry: 'PK',
+        addressLocality: addressInfo.addressLocality,
+        addressCountry: addressInfo.addressCountry,
+        ...(addressInfo.addressRegion && { addressRegion: addressInfo.addressRegion }),
+        ...(addressInfo.postalCode && { postalCode: addressInfo.postalCode }),
+        ...(addressInfo.streetAddress && { streetAddress: addressInfo.streetAddress }),
       },
     },
-    ...(job.salary_range && {
+    ...(salaryInfo && {
       baseSalary: {
         '@type': 'MonetaryAmount',
-        currency: 'PKR',
+        currency: salaryInfo.currency,
         value: {
           '@type': 'QuantitativeValue',
-          value: job.salary_range,
-          unitText: 'MONTH',
+          ...(salaryInfo.minValue && { minValue: salaryInfo.minValue }),
+          ...(salaryInfo.maxValue && { maxValue: salaryInfo.maxValue }),
+          ...(salaryInfo.minValue && !salaryInfo.maxValue && { value: salaryInfo.minValue }),
+          unitText: salaryInfo.unitText,
         },
       },
     }),
