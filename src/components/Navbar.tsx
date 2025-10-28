@@ -61,6 +61,23 @@ export default function Navbar() {
               Contact
             </Link>
             
+            {/* Safety Alerts - Conditional based on auth */}
+            {user ? (
+              <Link 
+                href="/safety-alerts" 
+                className="text-foreground hover:text-primary transition-all duration-200 hover:underline underline-offset-4"
+              >
+                Safety Alerts
+              </Link>
+            ) : (
+              <Link 
+                href="/auth/login" 
+                className="text-foreground hover:text-primary transition-all duration-200 hover:underline underline-offset-4"
+              >
+                Safety Alerts
+              </Link>
+            )}
+            
             {/* Resume Builder - Conditional based on auth */}
             {user ? (
               <Link 
@@ -134,6 +151,25 @@ export default function Navbar() {
             >
               Contact
             </Link>
+            
+            {/* Safety Alerts - Conditional based on auth */}
+            {user ? (
+              <Link 
+                href="/safety-alerts" 
+                className="block text-foreground hover:text-primary transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Safety Alerts
+              </Link>
+            ) : (
+              <Link 
+                href="/auth/login" 
+                className="block text-foreground hover:text-primary transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Safety Alerts
+              </Link>
+            )}
             
             {/* Resume Builder - Conditional based on auth */}
             {user ? (
