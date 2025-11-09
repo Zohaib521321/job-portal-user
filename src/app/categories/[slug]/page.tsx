@@ -21,6 +21,7 @@ interface Category {
 
 interface Job {
   id: number;
+  slug: string;
   title: string;
   company_name: string;
   location: string;
@@ -208,7 +209,8 @@ export default function CategoryJobs() {
                   {jobs.map((job) => (
                     <JobCard
                       key={job.id}
-                      id={job.id.toString()}
+                      id={job.id}
+                      slug={job.slug}
                       title={job.title}
                       company={job.company_name}
                       location={job.location || 'Not specified'}

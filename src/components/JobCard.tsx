@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { getJobUrl } from '@/lib/slugify';
 
 interface JobCardProps {
-  id: string;
+  id: number;
+  slug: string;
   title: string;
   company: string;
   location: string;
@@ -14,7 +14,9 @@ interface JobCardProps {
   priority?: string;
 }
 
-export default function JobCard({ id, title, company, location, type, salary, description, priority }: JobCardProps) {
+export default function JobCard({ id, slug, title, company, location, type, salary, description, priority }: JobCardProps) {
+  const jobHref = `/jobs/${slug || id}`;
+
   return (
     <div className="bg-surface rounded-lg p-6 hover:border hover:border-primary transition-all duration-200 shadow-lg hover:shadow-xl">
       {/* Badges Row - Featured & Job Type */}
@@ -59,7 +61,7 @@ export default function JobCard({ id, title, company, location, type, salary, de
       <p className="text-text-secondary text-sm mb-4 line-clamp-2">{description}</p>
       
       <Link 
-        href={getJobUrl(parseInt(id), title, company)}
+        href={jobHref}
         className="inline-block bg-primary text-background font-semibold px-6 py-2 rounded-lg hover:bg-primary-dark transition-all duration-200"
       >
         Apply Now

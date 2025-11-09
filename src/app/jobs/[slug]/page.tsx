@@ -7,7 +7,6 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 
 import { apiGet } from '@/lib/api';
-import { extractJobId, generateJobSlug } from '@/lib/slugify';
 import { 
   SITE_CONFIG, 
   generateJobPostingSchema, 
@@ -20,6 +19,7 @@ const SITE_URL = 'https://jobhunt.pk';
 
 interface Job {
   id: number;
+  slug: string;
   title: string;
   description: string;
   location: string;
@@ -94,11 +94,11 @@ export default function JobDetails() {
   // Update SEO metadata when job is loaded
   useEffect(() => {
     if (job) {
-      const seoSlug = generateJobSlug(job.id, job.title, job.company_name);
+      const jobSlug = job.slug || job.id.toString();
       const pageTitle = `${job.title} at ${job.company_name} - ${job.location} | ${SITE_CONFIG.name}`;
       const description = truncateDescription(job.description);
       const keywords = generateJobKeywords(job);
-      const pageUrl = `${SITE_URL}/jobs/${seoSlug}`;
+      const pageUrl = `${SITE_URL}/jobs/${jobSlug}`;
 
       // Update document title
       document.title = pageTitle;
@@ -126,33 +126,30 @@ export default function JobDetails() {
       // Add JSON-LD structured data
       addStructuredData('job-posting-schema', generateJobPostingSchema({
         ...job,
-        slug: seoSlug
+        slug: jobSlug
       }));
       
       addStructuredData('breadcrumb-schema', generateBreadcrumbSchema([
         { name: 'Home', url: '/' },
         { name: 'Jobs', url: '/' },
-        { name: job.title, url: `/jobs/${seoSlug}` }
+        { name: job.title, url: `/jobs/${jobSlug}` }
       ]));
     }
   }, [job]);
 
-  const fetchJob = useCallback(async (id: string) => {
+  const fetchJob = useCallback(async (identifier: string) => {
     try {
       setIsLoading(true);
-      const data = await apiGet<JobApiResponse>(`/api/jobs/${id}`);
+      const data = await apiGet<JobApiResponse>(`/api/jobs/${identifier}`);
 
       if (data.success) {
         setJob(data.data);
         
-        // Redirect to SEO-friendly URL if accessing via numeric ID only
         const currentSlug = params.slug as string;
-        const jobId = extractJobId(currentSlug);
-        const seoSlug = generateJobSlug(data.data.id, data.data.title, data.data.company_name);
-        
-        // If the current slug is just the ID (no title), redirect to SEO-friendly URL
-        if (jobId && currentSlug === jobId.toString()) {
-          router.replace(`/jobs/${seoSlug}`, { scroll: false });
+        const canonicalSlug = data.data.slug || data.data.id.toString();
+
+        if (currentSlug !== canonicalSlug) {
+          router.replace(`/jobs/${canonicalSlug}`, { scroll: false });
         }
       } else {
         setError('Job not found');
@@ -167,15 +164,7 @@ export default function JobDetails() {
 
   useEffect(() => {
     if (params.slug) {
-      const slug = params.slug as string;
-      const jobId = extractJobId(slug);
-      
-      if (jobId) {
-        fetchJob(jobId.toString());
-      } else {
-        setError('Invalid job URL');
-        setIsLoading(false);
-      }
+      fetchJob(params.slug as string);
     }
   }, [params.slug, fetchJob]);
 
@@ -219,8 +208,8 @@ export default function JobDetails() {
   });
 
   // Generate SEO-friendly URL for sharing
-  const seoSlug = generateJobSlug(job.id, job.title, job.company_name);
-  const jobUrl = `${SITE_URL}/jobs/${seoSlug}`;
+  const jobSlug = job.slug || job.id.toString();
+  const jobUrl = `${SITE_URL}/jobs/${jobSlug}`;
   const jobTitle = `${job.title} at ${job.company_name}`;
 
   const handleShare = (platform: string) => {

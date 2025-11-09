@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
+import { listPublicSafetyAlerts } from '@/services/safetyAlertsService';
 
 // Types
 interface SafetyAlert {
@@ -17,26 +18,7 @@ interface SafetyAlert {
   updated_at: string;
 }
 
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-  timestamp: string;
-}
-
-type PaginatedResponse<T> = ApiResponse<{
-  alerts: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    hasMore: boolean;
-  };
-}>;
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY || 'test123456789';
+// Fetched via central API client and service
 
 export default function SafetyAlertsPage() {
   const { user, token, isLoading: authLoading } = useAuth();
@@ -61,29 +43,17 @@ export default function SafetyAlertsPage() {
     try {
       setIsLoading(true);
       
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: '10'
-      });
-
-      const response = await fetch(`${API_BASE_URL}/api/safety-alerts/public?${params.toString()}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': API_KEY,
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data: PaginatedResponse<SafetyAlert> = await response.json();
+      const data = await listPublicSafetyAlerts({ page: currentPage, limit: 10 });
 
       if (data.success) {
-        setAlerts(data.data.alerts);
-        setTotalPages(data.data.pagination.totalPages);
+        // Support both shapes: { data: { alerts, pagination } } or { data: [], pagination }
+        const alertsData = Array.isArray((data as any).data)
+          ? (data as any).data
+          : (data as any).data?.alerts;
+        const pagination = (data as any).pagination || (data as any).data?.pagination;
+
+        setAlerts(alertsData || []);
+        setTotalPages(pagination?.totalPages || 1);
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to fetch safety alerts');
