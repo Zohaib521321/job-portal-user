@@ -18,6 +18,22 @@ interface SafetyAlert {
   updated_at: string;
 }
 
+type PaginationMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasMore: boolean;
+};
+
+type AlertsPayload = SafetyAlert[] | { alerts: SafetyAlert[]; pagination?: PaginationMeta };
+
+const isAlertsContainer = (value: unknown): value is { alerts: SafetyAlert[]; pagination?: PaginationMeta } =>
+  typeof value === 'object' &&
+  value !== null &&
+  'alerts' in value &&
+  Array.isArray((value as { alerts: SafetyAlert[] }).alerts);
+
 // Fetched via central API client and service
 
 export default function SafetyAlertsPage() {
@@ -43,18 +59,19 @@ export default function SafetyAlertsPage() {
     try {
       setIsLoading(true);
       
-      const data = await listPublicSafetyAlerts({ page: currentPage, limit: 10 });
+      const response = await listPublicSafetyAlerts({ page: currentPage, limit: 10 });
 
-      if (data.success) {
-        // Support both shapes: { data: { alerts, pagination } } or { data: [], pagination }
-        const alertsData = Array.isArray((data as any).data)
-          ? (data as any).data
-          : (data as any).data?.alerts;
-        const pagination = (data as any).pagination || (data as any).data?.pagination;
+      if (response.success) {
+        const payload: AlertsPayload = response.data as AlertsPayload;
+        const alertsData = Array.isArray(payload) ? payload : payload.alerts;
+        const paginationMeta = response.pagination ?? (isAlertsContainer(payload) ? payload.pagination : undefined);
 
-        setAlerts(alertsData || []);
-        setTotalPages(pagination?.totalPages || 1);
+        setAlerts(alertsData);
+        setTotalPages(paginationMeta?.totalPages ?? 1);
+        return;
       }
+
+      setError(response.error.message);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to fetch safety alerts');
     } finally {

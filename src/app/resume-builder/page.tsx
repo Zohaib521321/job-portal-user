@@ -5,6 +5,7 @@ import { useResume } from '@/contexts/ResumeContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 
 // Template configuration
@@ -298,13 +299,16 @@ export default function ResumeBuilderPage() {
                         >
                           <div className="flex flex-col gap-2">
                             {template.previewImage ? (
-                              <div className={`w-full aspect-[3/4] rounded border-2 overflow-hidden ${
+                              <div className={`relative w-full aspect-[3/4] rounded border-2 overflow-hidden ${
                                 selectedTemplate === template.id ? 'border-primary' : 'border-accent'
                               }`}>
-                                <img 
+                                <Image 
                                   src={template.previewImage} 
                                   alt={template.name}
-                                  className="w-full h-full object-cover"
+                                  fill
+                                  className="object-cover"
+                                  sizes="(max-width: 1024px) 192px, 220px"
+                                  priority={selectedTemplate === template.id}
                                 />
                               </div>
                             ) : (
@@ -344,13 +348,15 @@ export default function ResumeBuilderPage() {
                       >
                         <div className="flex items-start gap-3">
                           {template.previewImage ? (
-                            <div className={`flex-shrink-0 w-16 h-20 rounded border-2 overflow-hidden ${
+                            <div className={`relative flex-shrink-0 w-16 h-20 rounded border-2 overflow-hidden ${
                               selectedTemplate === template.id ? 'border-primary' : 'border-accent'
                             }`}>
-                              <img 
+                              <Image 
                                 src={template.previewImage} 
                                 alt={template.name}
-                                className="w-full h-full object-cover"
+                                fill
+                                className="object-cover"
+                                sizes="64px"
                               />
                             </div>
                           ) : (
@@ -623,32 +629,39 @@ export default function ResumeBuilderPage() {
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {resumes.map((resume) => (
-                  <div
-                    key={resume.id}
-                    className="bg-background border border-accent rounded-lg overflow-hidden hover:border-primary/50 transition-all group"
-                  >
-                    {/* Template Preview Thumbnail */}
-                    <div className="aspect-[3/4] bg-accent/20 border-b border-accent group-hover:bg-accent/30 transition-colors overflow-hidden">
-                      {TEMPLATES.find(t => t.id === resume.template_name)?.previewImage ? (
-                        <img 
-                          src={TEMPLATES.find(t => t.id === resume.template_name)?.previewImage} 
-                          alt={TEMPLATES.find(t => t.id === resume.template_name)?.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="text-center p-4">
-                            <svg className="w-12 h-12 text-text-secondary/50 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <p className="text-xs text-text-secondary">
-                              {TEMPLATES.find(t => t.id === resume.template_name)?.name || resume.template_name}
-                            </p>
+                {resumes.map((resume) => {
+                  const templateMeta = TEMPLATES.find((template) => template.id === resume.template_name);
+                  const templatePreview = templateMeta?.previewImage;
+                  const templateName = templateMeta?.name ?? resume.template_name;
+
+                  return (
+                    <div
+                      key={resume.id}
+                      className="bg-background border border-accent rounded-lg overflow-hidden hover:border-primary/50 transition-all group"
+                    >
+                      {/* Template Preview Thumbnail */}
+                      <div className="relative aspect-[3/4] bg-accent/20 border-b border-accent group-hover:bg-accent/30 transition-colors overflow-hidden">
+                        {templatePreview ? (
+                          <Image
+                            src={templatePreview}
+                            alt={templateName}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 1024px) 300px, 360px"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <div className="text-center p-4">
+                              <svg className="w-12 h-12 text-text-secondary/50 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              <p className="text-xs text-text-secondary">
+                                {templateName}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
+                        )}
+                      </div>
 
                     {/* Resume Info */}
                     <div className="p-4">
@@ -707,8 +720,8 @@ export default function ResumeBuilderPage() {
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
